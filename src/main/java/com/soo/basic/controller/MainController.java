@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.soo.basic.dto.request.PatchValidationDto;
 import com.soo.basic.dto.request.PostRequestBodyDto;
+import com.soo.basic.dto.request.PostUserRequestDto;
+import com.soo.basic.dto.response.PostUserResponseDto;
 import com.soo.basic.dto.response.TmpResponseDto;
 import com.soo.basic.service.MainService;
 import com.soo.basic.service.implement.MainServiceImplement;
@@ -140,6 +142,14 @@ public class MainController {
     public ResponseEntity<TmpResponseDto> getResponseEntity() {
         TmpResponseDto responseBody = new TmpResponseDto("안녕하세요", 10);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
+    }
+
+    @PostMapping("user")
+    public ResponseEntity<? super PostUserResponseDto> postUser(
+        @RequestBody @Valid PostUserRequestDto requestBody      // @Valid : 유효성 검사
+    ) {
+        ResponseEntity<? super PostUserResponseDto> response = mainService.postUser(requestBody);
+        return response;
     }
 
 }
