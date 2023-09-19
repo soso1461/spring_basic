@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.soo.basic.dto.request.PatchNicknameRequestDto;
 import com.soo.basic.dto.request.PatchValidationDto;
 import com.soo.basic.dto.request.PostRequestBodyDto;
 import com.soo.basic.dto.request.PostUserRequestDto;
+import com.soo.basic.dto.response.DeleteUserResponseDto;
+import com.soo.basic.dto.response.PatchNicknameResponseDto;
 import com.soo.basic.dto.response.PostUserResponseDto;
 import com.soo.basic.dto.response.TmpResponseDto;
 import com.soo.basic.service.MainService;
@@ -149,6 +152,22 @@ public class MainController {
         @RequestBody @Valid PostUserRequestDto requestBody      // @Valid : 유효성 검사
     ) {
         ResponseEntity<? super PostUserResponseDto> response = mainService.postUser(requestBody);
+        return response;
+    }
+
+    @PatchMapping("nickname")
+    public ResponseEntity<? super PatchNicknameResponseDto> patchNickname(
+        @RequestBody @Valid PatchNicknameRequestDto requestBody
+    ) {
+        ResponseEntity<? super PatchNicknameResponseDto> response = mainService.patchNickname(requestBody);
+        return response;
+    }
+
+    @DeleteMapping("user/{email}")
+    public ResponseEntity<? super DeleteUserResponseDto> deleteUser(
+        @PathVariable("email") String email
+    ) {
+        ResponseEntity<? super DeleteUserResponseDto> response = mainService.deleteUser(email);
         return response;
     }
 
