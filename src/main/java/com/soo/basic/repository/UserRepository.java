@@ -43,7 +43,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     // SELECT * FROM user WHERE email = '??' AND nickname = '??';
     // JPQL
-    @Query(value = "SELECT u FROM user u WHERE u.email = ?1 AND u.nickname =?2")
+    @Query(value = "SELECT u FROM user u WHERE u.email = ?1 AND u.nickname =?2") // u.email = ?1 AND u.nickname =?2 여기서 ?1은 email, ?2는 nickname
     UserEntity findByEmailAndNicknameJPQL(String email, String nickname);
     // SQL ex)
     @Query(value = 

@@ -1,6 +1,5 @@
 package com.soo.basic.entity;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -10,7 +9,6 @@ import com.soo.basic.dto.request.PostUserRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 // description: Entity - JPA를 사용할 때 데이터베이스의 테이블과 매핑되는 Java 객체 //
 
