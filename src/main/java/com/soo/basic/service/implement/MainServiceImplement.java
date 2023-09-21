@@ -3,15 +3,20 @@ package com.soo.basic.service.implement;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.soo.basic.dto.request.PatchNicknameRequestDto;
 import com.soo.basic.dto.request.PostUserRequestDto;
+import com.soo.basic.dto.request.SignInRequestDto;
 import com.soo.basic.dto.response.DeleteUserResponseDto;
 import com.soo.basic.dto.response.PatchNicknameResponseDto;
 import com.soo.basic.dto.response.PostUserResponseDto;
 import com.soo.basic.dto.response.ResponseDto;
+import com.soo.basic.dto.response.SignInResponseDto;
 import com.soo.basic.entity.UserEntity;
+import com.soo.basic.provider.JwtProvider;
 import com.soo.basic.repository.UserRepository;
 import com.soo.basic.service.MainService;
 
@@ -24,6 +29,11 @@ import lombok.RequiredArgsConstructor;
 public class MainServiceImplement implements MainService {
 
     private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
+
+    // description: PasswordEncoder - 비밀번호를 안전하게 암호화 하고 검증하는 인터페이스 //
+    // description: BcryptPasswordEncoder - BCrypt 해시 알고리즘을 사용하는 PasswordEncoder 구현 클래스 //
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public String getMethod() {
@@ -37,6 +47,14 @@ public class MainServiceImplement implements MainService {
         // VALUES(dto.getEmail(), dto.getPassword(), ...);
 
         try {
+            // description: 비밀번호 암호화 작업 //
+            // description: 1. dto로부터 평문의 비밀번호(암호화 할 문자열)를 가져옴 //
+            String password = dto.getPassword();
+            // description: 2. PasswordEncoder의 인스턴스의 encode() 메서드로 평문을 암호화 //
+            String encodedPassword = passwordEncoder.encode(password);
+            // description: 3. dto에 다시 주입 //
+            dto.setPassword(encodedPassword);
+            
             // description: Create 작업 순서 (INSERT) //
             // description: 1. Entity 인스턴스 생성 //
             UserEntity userEntity = new UserEntity(dto);
@@ -96,6 +114,44 @@ public class MainServiceImplement implements MainService {
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(new DeleteUserResponseDto("SU", "SUCCESS"));
+    }
+
+    @Override
+    public ResponseEntity<? super SignInResponseDto> signIn(SignInRequestDto dto) {
+
+        SignInResponseDto responseBody = null;
+
+
+        try {
+            
+            String email = dto.getEmail();
+
+            // description: 1. dto로 받은 email을 이용하여 데이터베이스에서 조회 //
+            UserEntity userEntity = userRepository.findByEmail(email);
+            // description: 2. email에 해당하는 레코드가 존재하는지 확인 //
+            if (userEntity == null)
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseDto("SF", "Sign In Failed"));
+            // description: 3. userEntity에서 암호화 되어 있는 password 추출 //
+            String encodedPassword = userEntity.getPassword();
+            // description: 4. dto에서 평문의 password 추출 //
+            String password = dto.getPassword();
+            // description: 5. 암호화 되어 있는 password와 평문의 password를 비교 //
+            // description: matches() - 평문의 문자열과 암호화된 문자열을 비교 //
+            boolean isMatched = passwordEncoder.matches(password, encodedPassword);
+            if (!isMatched)
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ResponseDto("SF", "Sign In Failed"));
+
+            // description: 6. 토큰 생성 //
+            String token = jwtProvider.create(email);
+
+            responseBody = new SignInResponseDto("SU", "SUCCESS", token);
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ResponseDto("DBE", "Database Error"));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
 
     }
     

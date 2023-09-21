@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,9 +21,11 @@ import com.soo.basic.dto.request.PatchNicknameRequestDto;
 import com.soo.basic.dto.request.PatchValidationDto;
 import com.soo.basic.dto.request.PostRequestBodyDto;
 import com.soo.basic.dto.request.PostUserRequestDto;
+import com.soo.basic.dto.request.SignInRequestDto;
 import com.soo.basic.dto.response.DeleteUserResponseDto;
 import com.soo.basic.dto.response.PatchNicknameResponseDto;
 import com.soo.basic.dto.response.PostUserResponseDto;
+import com.soo.basic.dto.response.SignInResponseDto;
 import com.soo.basic.dto.response.TmpResponseDto;
 import com.soo.basic.provider.JwtProvider;
 import com.soo.basic.service.MainService;
@@ -191,4 +194,19 @@ public class MainController {
         return response;
     }
 
+    @GetMapping("principle")
+    public ResponseEntity<String> getPrinciple(
+        // description: Spring Security Context에 등록되어 있는 접근 주체를 가져오는 어노테이션 //
+        @AuthenticationPrincipal String subject
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(subject);
+    }
+
+    @PostMapping("sign-in")
+    public ResponseEntity<? super SignInResponseDto> signIn(
+        @RequestBody @Valid SignInRequestDto requestBody
+    ) {
+        ResponseEntity<? super SignInResponseDto> response = mainService.signIn(requestBody);
+        return response;
+    }
 }
